@@ -1,0 +1,130 @@
+﻿@model MVC_Field_Update.Models.SlideShow
+@using Sitecore.Mvc
+@{
+    string active = "";
+    string imgStyle = "";
+    int count = 0;
+}
+
+@if (Sitecore.Context.PageMode.IsPageEditor)
+{
+    <div>Folder Item: @Model.FolderItem</div><br />
+    
+    if (!@Sitecore.Data.ID.IsID(Model.Rendering.DataSource))
+    {
+        <div>No Associated Datasource.<br />Please Create New Datasource</div><br />
+        <input type="button" class="btnAddDS" value="Create DataSource" onclick="callSetDataSrc()" />
+    }
+    else
+    {
+        <div class="newdata">
+            <h3>SlideShow Component Info</h3>
+            Title: @Html.Raw(Model.Title) <br />
+            Style Class: @Html.Raw(Model.StyleClass) <br />
+            HTML ID: @Html.Raw(Model.HtmlID) <br />
+            Transition Time: @Html.Raw(Model.TransitionTime) <br /> 
+
+            Pause On Hover: <select name="list" id="PauseOnHover" onclick="javascript:dlOnChangeUpdate('PauseOnHover');">
+                <option value="True" @Html.Raw((Model.chPauseOnHover.Checked) ? "selected" : "")>Enable</option>
+                <option value="False" @Html.Raw((!Model.chPauseOnHover.Checked) ? "selected" : "")>Disable</option>
+            </select><br />
+            Fade Transition: <select name="list" id="FadeTransition" onclick="javascript:dlOnChangeUpdate('FadeTransition');">
+                <option value="True" @Html.Raw((Model.chFadeTransition.Checked) ? "selected" : "")>Enable</option>
+                <option value="False" @Html.Raw((!Model.chFadeTransition.Checked) ? "selected" : "")>Disable</option>
+            </select><br />
+            SlideShow Arrow: <select name="list" id="SlideShowNoArrow" onclick="javascript:dlOnChangeUpdate('SlideShowNoArrow');">
+                <option value="True" @Html.Raw((!Model.chSlideShowNoArrow.Checked) ? "selected" : "")>Enable</option>
+                <option value="False" @Html.Raw((Model.chSlideShowNoArrow.Checked) ? "selected" : "")>Disable</option>
+            </select><br />
+            SlideShow Indicator: <select name="list" id="SlideShowNoIndicator" onclick="javascript:dlOnChangeUpdate('SlideShowNoIndicator');">
+                <option value="True" @Html.Raw((!Model.chSlideShowNoIndicator.Checked) ? "selected" : "")>Enable</option>
+                <option value="False" @Html.Raw((Model.chSlideShowNoIndicator.Checked) ? "selected" : "")>Disable</option>
+            </select><br />
+
+            <script type="text/javascript">
+                function dlOnChange(fieldName)
+                {
+                    $("#" + fieldName).on('change', function () {
+                        var changedValue = $("#" + fieldName).val();
+
+                        $.ajax({
+                            url: '@Url.Action("SlideShow","Components")',
+                            type: "POST",
+                            data: { "changedValue": changedValue, "fieldName": fieldName },
+                            context: this,
+                            success: function (data) {
+                                Sitecore.PageModes.PageEditor.postRequest('webedit:save()');
+                                console.log("success", data);
+                            },
+                            error: function (data) {
+                                alert('error: ' + data);
+                                console.log("error", data);
+                            }
+                        });
+                    });
+                }
+            </script>
+
+            <hr />
+            @foreach (Sitecore.Data.Items.Item item in @Model.Item.Children)
+            {
+                @:Title:@Html.Raw(Model.DataItems(item, "title", "")) <br />
+                @:Description:@Html.Raw(Model.DataItems(item, "description", "")) <br />
+                @:Link: @Html.Raw(Model.DataItems(item, "link", "")) <br />
+                
+                if (!String.IsNullOrEmpty(Model.DataItems(item, "image", "")))
+                {
+                    imgStyle = "style=width: 70px;";
+                }
+                @:Image:<br /> @Html.Raw(Model.DataItems(item, "image", imgStyle)) <br />
+                @Model.ActionItemButton("delete", "Remove This", item) @:&nbsp;
+                @Model.MoveItemButton("moveup", "Move up", item) @:&nbsp;
+                @Model.MoveItemButton("movedown", "Move down", item) 
+                <hr />
+            }
+            <input type="button" class="btnAddDS2" value="Add Image Item" onclick="callAddItemToDataSrc()" />
+        </div>
+    }
+}
+else
+{
+    if (!Model.Item.HasChildren)
+    {
+        @Model.Error;
+    }
+    else
+    {
+        <div id="@Model.HtmlID" class="carousel slide @Model.StyleClass @Model.FadeTransition @Model.SlideShowNoArrow @Model.SlideShowNoIndicator" data-ride="carousel" data-interval="@Model.TransitionTime" data-pause="@Model.PauseOnHover">
+            <!-- Indicators -->
+            <ol class="carousel-indicators">
+                @for (int i = 0; i < @Model.Item.Children.Count(); i++)
+                {
+                    if (i == 0) { active = "active"; } else { active = ""; }
+                    <li data-target="#@Model.HtmlID" data-slide-to="@i" class="@active"></li>
+                } 
+            </ol>
+
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner">
+                @foreach (Sitecore.Data.Items.Item item in @Model.Item.Children)
+                {
+                    if (count == 0) { active = "active"; } else { active = ""; }
+            
+                    <div class="item @active">
+                        @Html.Raw(item.Fields["image"].Value)
+                        <div class="carousel-caption"></div>
+                    </div>
+                    count++;
+                } 
+            </div>
+
+            <!-- Controls -->
+            <a class="left carousel-control" href="#@Model.HtmlID" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </a>
+            <a class="right carousel-control" href="#@Model.HtmlID" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </a>
+        </div>
+    }
+}
