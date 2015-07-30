@@ -28,12 +28,6 @@ namespace MVC_Field_Update.Models
         public Sitecore.Data.Fields.CheckboxField chFadeTransition { get; set; }
         public Sitecore.Data.Fields.CheckboxField chSlideShowNoArrow { get; set; }
         public Sitecore.Data.Fields.CheckboxField chSlideShowNoIndicator { get; set; }
-        public IEnumerable<SelectListItem> PauseOnHoverList { get; set; }
-        public IEnumerable<SelectListItem> FadeTransitionList { get; set; }
-        public IEnumerable<SelectListItem> SlideShowNoArrowList { get; set; }
-        public IEnumerable<SelectListItem> SlideShowNoIndicatorList { get; set; }
-
-        public HtmlString inputType { get; set; }
 
         public void Initialize(Sitecore.Mvc.Presentation.Rendering rendering)
         {
