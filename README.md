@@ -1,5 +1,5 @@
 # MVC-Field-Update-by-Controller-Rendering
-MVC Field Update by Controller Rendering
+Sitecore MVC Field Update by Controller Rendering in Page Editor/xEditor
 
 This is a Bootstrap Slideshow component and SC developer/editor can update rendering component's template values in page editor/xeditor without opening a dialog pop-up for related item.
 
